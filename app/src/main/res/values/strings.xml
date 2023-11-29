@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TimeTree Application</string>
+    <string name="app_name">TimeTree</string>
     <string name="delete_confirmation">Confirmation</string>
     <string name="sureToDelete">Are you sure you want to delete the task</string>
     <string name="yes">Yes</string>

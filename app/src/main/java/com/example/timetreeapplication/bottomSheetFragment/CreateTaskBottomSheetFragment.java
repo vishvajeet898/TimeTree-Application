@@ -210,6 +210,7 @@ public class CreateTaskBottomSheetFragment extends BottomSheetDialogFragment {
 
             @Override
             protected void onPostExecute(Void aVoid) {
+                Toast.makeText(activity, "INSIDE POSTEXECUTE", Toast.LENGTH_SHORT).show();
                 super.onPostExecute(aVoid);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     createAnAlarm();
@@ -227,12 +228,12 @@ public class CreateTaskBottomSheetFragment extends BottomSheetDialogFragment {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void createAnAlarm() {
         try {
-            String[] items1 = taskDate.getText().toString().split("-");
+            String[] items1 = binding.taskDate.getText().toString().split("-");
             String dd = items1[0];
             String month = items1[1];
             String year = items1[2];
 
-            String[] itemTime = taskTime.getText().toString().split(":");
+            String[] itemTime = binding.taskTime.getText().toString().split(":");
             String hour = itemTime[0];
             String min = itemTime[1];
 
@@ -247,12 +248,15 @@ public class CreateTaskBottomSheetFragment extends BottomSheetDialogFragment {
             cal.set(Calendar.DATE, Integer.parseInt(dd));
 
             Intent alarmIntent = new Intent(activity, AlarmBroadcastReceiver.class);
-            alarmIntent.putExtra("TITLE", addTaskTitle.getText().toString());
-            alarmIntent.putExtra("DESC", addTaskDescription.getText().toString());
-            alarmIntent.putExtra("DATE", taskDate.getText().toString());
-            alarmIntent.putExtra("TIME", taskTime.getText().toString());
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(activity,count, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmIntent.putExtra("TITLE", binding.addTaskTitle.getText().toString());
+            alarmIntent.putExtra("DESC", binding.addTaskDescription.getText().toString());
+            alarmIntent.putExtra("DATE", binding.taskDate.getText().toString());
+            alarmIntent.putExtra("TIME", binding.taskTime.getText().toString());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(activity,count, alarmIntent, PendingIntent.FLAG_MUTABLE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                Toast.makeText(activity, "HEREEEEEEE", Toast.LENGTH_SHORT).show();
+
                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);

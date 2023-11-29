@@ -35,6 +35,7 @@ public class AlarmService extends Service {
     }
 
     protected void onHandleIntent(Intent intent) {
+        Log.d("TAG-Service", "onHandleIntent: "+intent.toString());
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
