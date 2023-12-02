@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -91,7 +92,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context, R.style.AppTheme_Dialog);
                 alertDialogBuilder.setTitle(R.string.delete_confirmation).setMessage(R.string.sureToDelete).
                         setPositiveButton(R.string.yes, (dialog, which) -> {
-                            deleteTaskFromId(task.getTaskId(), position);
+                            deleteTaskFromId(task, position);
                         })
                         .setNegativeButton(R.string.no, (dialog, which) -> dialog.cancel()).show();
             }
@@ -104,42 +105,25 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             else if (item.getItemId() == R.id.menuComplete){
                 AlertDialog.Builder completeAlertDialog = new AlertDialog.Builder(context, R.style.AppTheme_Dialog);
                 completeAlertDialog.setTitle(R.string.confirmation).setMessage(R.string.sureToMarkAsComplete).
-                        setPositiveButton(R.string.yes, (dialog, which) -> showCompleteDialog(task.getTaskId(), position))
+                        setPositiveButton(R.string.yes, (dialog, which)  -> {
+                            showCompleteDialog(task, position);
+                            updateTaskFromId(task, position);
+                        })
                         .setNegativeButton(R.string.no, (dialog, which) -> dialog.cancel()).show();
 
             }
-           /* switch (item.getItemId()) {
-                case R.id.menuDelete:
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context, R.style.AppTheme_Dialog);
-                    alertDialogBuilder.setTitle(R.string.delete_confirmation).setMessage(R.string.sureToDelete).
-                            setPositiveButton(R.string.yes, (dialog, which) -> {
-                                deleteTaskFromId(task.getTaskId(), position);
-                            })
-                            .setNegativeButton(R.string.no, (dialog, which) -> dialog.cancel()).show();
-                    break;
-                case R.id.menuUpdate:
-                    CreateTaskBottomSheetFragment createTaskBottomSheetFragment = new CreateTaskBottomSheetFragment();
-                    createTaskBottomSheetFragment.setTaskId(task.getTaskId(), true, context, context);
-                    createTaskBottomSheetFragment.show(context.getSupportFragmentManager(), createTaskBottomSheetFragment.getTag());
-                    break;
-                case R.id.menuComplete:
-                    AlertDialog.Builder completeAlertDialog = new AlertDialog.Builder(context, R.style.AppTheme_Dialog);
-                    completeAlertDialog.setTitle(R.string.confirmation).setMessage(R.string.sureToMarkAsComplete).
-                            setPositiveButton(R.string.yes, (dialog, which) -> showCompleteDialog(task.getTaskId(), position))
-                            .setNegativeButton(R.string.no, (dialog, which) -> dialog.cancel()).show();
-                    break;
-            }*/
+
             return false;
         });
         popupMenu.show();
     }
 
-    public void showCompleteDialog(int taskId, int position) {
+    public void showCompleteDialog(Task task, int position) {
         Dialog dialog = new Dialog(context, R.style.AppTheme);
         dialog.setContentView(R.layout.dialog_completed_theme);
         Button close = dialog.findViewById(R.id.closeButton);
         close.setOnClickListener(view -> {
-            deleteTaskFromId(taskId, position);
+            deleteTaskFromId(task, position);
             dialog.dismiss();
         });
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -147,14 +131,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
 
-    private void deleteTaskFromId(int taskId, int position) {
+    private void updateTaskFromId(Task task, int position) {
         class GetSavedTasks extends AsyncTask<Void, Void, List<Task>> {
             @Override
             protected List<Task> doInBackground(Void... voids) {
                 DatabaseClient.getInstance(context)
                         .getAppDatabase()
                         .dataBaseAction()
-                        .deleteTaskFromId(taskId);
+                        .updateAnExistingRow(task.getTaskId(),task.getTaskTitle(),task.getTaskDescrption(),"1",task.getDate(),
+                        task.getFirstAlarmTime(), task.getEvent());
 
                 return taskList;
             }
@@ -169,6 +154,32 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         GetSavedTasks savedTasks = new GetSavedTasks();
         savedTasks.execute();
     }
+private void deleteTaskFromId(Task task, int position) {
+        class GetSavedTasks extends AsyncTask<Void, Void, List<Task>> {
+            @Override
+            protected List<Task> doInBackground(Void... voids) {
+                DatabaseClient.getInstance(context)
+                        .getAppDatabase()
+                        .dataBaseAction()
+                        .deleteTaskFromId(task.getTaskId());
+
+
+                return taskList;
+            }
+
+            @Override
+            protected void onPostExecute(List<Task> tasks) {
+                super.onPostExecute(tasks);
+                removeAtPosition(position);
+                setRefreshListener.refresh();
+            }
+        }
+        GetSavedTasks savedTasks = new GetSavedTasks();
+        savedTasks.execute();
+    }
+
+
+
 
     private void removeAtPosition(int position) {
         taskList.remove(position);

@@ -71,6 +71,9 @@ dependencies {
    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation("com.applandeo:material-calendar-view:1.7.0")
+    implementation("com.github.antonKozyriatskyi:CircularProgressIndicator:1.3.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.github.uzairiqbal91:CircularTimerView:1.0")
     //implementation("com.applandeo:material-calendar-view:1.7.0")
 
 

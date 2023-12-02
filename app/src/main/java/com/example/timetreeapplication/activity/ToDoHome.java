@@ -1,16 +1,15 @@
 package com.example.timetreeapplication.activity;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.codegama.timetreeapplication.R;
@@ -30,16 +29,10 @@ public class ToDoHome extends BaseActivity implements CreateTaskBottomSheetFragm
 
     private ActivityToDoHomeBinding toDoHomeBinding;
 
-   /* @BindView(R.id.taskRecycler)
-    RecyclerView taskRecycler;
-    @BindView(R.id.addTask)
-    TextView addTask;*/
+
     TaskAdapter taskAdapter;
     List<Task> tasks = new ArrayList<>();
-   /* @BindView(R.id.noDataImage)
-    ImageView noDataImage;
-    @BindView(R.id.calendar)
-    ImageView calendar;*/
+    List<Task> completedTasks = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +42,20 @@ public class ToDoHome extends BaseActivity implements CreateTaskBottomSheetFragm
         super.onCreate(savedInstanceState);
         setContentView(v);
         setUpAdapter();
+
+        toDoHomeBinding.card.setOnClickListener(view -> {
+            Intent i = new Intent(this,Statistics.class);
+            startActivity(i);
+        });
+
+
+        toDoHomeBinding.sprint.setOnClickListener(view -> {
+            Intent i = new Intent(this, AprintActivity.class);
+            startActivity(i);
+        });
+
+
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         ComponentName receiver = new ComponentName(this, AlarmBroadcastReceiver.class);
@@ -63,11 +70,18 @@ public class ToDoHome extends BaseActivity implements CreateTaskBottomSheetFragm
         });
 
         getSavedTasks();
+        getCompletedTasks(this);
+
 
         toDoHomeBinding.calendar.setOnClickListener(view -> {
             ShowCalendarViewBottomSheet showCalendarViewBottomSheet = new ShowCalendarViewBottomSheet();
             showCalendarViewBottomSheet.show(getSupportFragmentManager(), showCalendarViewBottomSheet.getTag());
         });
+
+
+
+        toDoHomeBinding.circularProgress.setMaxProgress(8);
+        toDoHomeBinding.circularProgress.setCurrentProgress(4);
     }
 
     public void setUpAdapter() {
@@ -104,5 +118,40 @@ public class ToDoHome extends BaseActivity implements CreateTaskBottomSheetFragm
     @Override
     public void refresh() {
         getSavedTasks();
+        getCompletedTasks(this);
+       /* toDoHomeBinding.circularProgress.setMaxProgress(tasks.size());
+
+        toDoHomeBinding.circularProgress.setCurrentProgress(completedTasks.size());*/
     }
+
+
+    private void getCompletedTasks(Context context) {
+        class GetSavedTasks extends AsyncTask<Void, Void, List<Task>> {
+            @Override
+            protected List<Task> doInBackground(Void... voids) {
+                completedTasks = DatabaseClient.getInstance(context)
+                        .getAppDatabase()
+                        .dataBaseAction()
+                        .getCompleted("1");
+
+                return completedTasks;
+            }
+
+            @Override
+            protected void onPostExecute(List<Task> completedTask) {
+                super.onPostExecute(completedTask);
+                toDoHomeBinding.circularProgress.setMaxProgress(tasks.size());
+                toDoHomeBinding.circularProgress.setCurrentProgress(completedTask.size());
+
+
+
+              //  refresh();
+            }
+        }
+        GetSavedTasks savedTasks = new GetSavedTasks();
+        savedTasks.execute();
+    }
+
+
+
 }

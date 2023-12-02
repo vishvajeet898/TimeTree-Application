@@ -201,6 +201,7 @@ public class CreateTaskBottomSheetFragment extends BottomSheetDialogFragment {
                             .dataBaseAction()
                             .updateAnExistingRow(taskId, binding.addTaskTitle.getText().toString(),
                                     binding.addTaskDescription.getText().toString(),
+                                    "0",
                                     binding.taskDate.getText().toString(),
                                     binding.taskTime.getText().toString(),
                                     binding.taskEvent.getText().toString());
